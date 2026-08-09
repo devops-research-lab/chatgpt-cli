@@ -1,55 +1,28 @@
 name: test
-
-on: [push, pull_request, workflow_dispatch]
-
+on:
+  push: null
 permissions:
   contents: read
-
 jobs:
   mod:
     runs-on: ubuntu-latest
-    name: Check modules
     steps:
-      - uses: actions/setup-go@v4
-        with:
-          go-version: 'stable'
-      - uses: actions/checkout@v4
-      - run: go mod tidy && git diff --exit-code go.mod go.sum
-
-  format:
-    runs-on: ubuntu-latest
-    name: Check Go formatting
-    needs: mod
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
-        with:
-          go-version: 'stable'
-      - run: go fmt ./... && git diff --exit-code
-
-  lint:
-    runs-on: ubuntu-latest
-    name: Lint Go code
-    needs: format
-    steps:
-      - uses: actions/checkout@v4
-      - uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-      - run: golangci-lint run
-
-  unit-tests:
-    runs-on: ubuntu-latest
-    name: Run unit tests
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - run: ./scripts/unit.sh
-
-  integration-tests:
-    runs-on: ubuntu-latest
-    name: Run integration tests
-    needs: unit-tests
-    steps:
-      - uses: actions/checkout@v4
-      - run: ./scripts/integration.sh
+    - uses: actions/setup-go@v4
+      with:
+        go-version: stable
+    - uses: actions/checkout@v4
+    - run: go mod tidy && git diff --exit-code go.mod go.sum
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v4
+      with:
+        go-version: stable
+    - run: go fmt ./... && git diff --exit-code
+    - uses: actions/checkout@v4
+    - uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest
+    - run: golangci-lint run
+    - uses: actions/checkout@v4
+    - run: ./scripts/unit.sh
+    - uses: actions/checkout@v4
+    - run: ./scripts/integration.sh
